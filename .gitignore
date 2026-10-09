@@ -1,0 +1,23 @@
+# Dependencias y builds
+node_modules/
+dist/
+build/
+
+# Variables de entorno (usar .env.example como plantilla)
+.env
+.env.*
+!.env.example
+
+# Datos: los CSV no se suben al repositorio
+data/*
+!data/.gitkeep
+
+# Volúmenes locales de las bases de datos
+mongo-data/
+neo4j-data/
+
+# Logs y archivos de sistema/IDE
+*.log
+.DS_Store
+.vscode/
+.idea/
