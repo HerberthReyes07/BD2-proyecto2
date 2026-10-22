@@ -1,0 +1,32 @@
+{
+  "name": "admision-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API del proyecto final de Bases de Datos 2: ETL, consultas MongoDB y consultas Neo4j",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc --noEmit",
+    "load": "tsx scripts/load-csv.ts",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "catalogo": "tsx scripts/generar-catalogo-municipios.ts",
+    "reconstruir": "tsx scripts/reconstruir.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "csv-parse": "^7.0.3",
+    "dotenv": "^18.0.9",
+    "express": "^4.22.3",
+    "mongodb": "^7.7.0",
+    "multer": "^2.5.0",
+    "neo4j-driver": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.25",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^20.19.43",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
