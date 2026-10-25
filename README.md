@@ -44,8 +44,11 @@ npm start
 | `npm start` | Inicia la API (`GET /api/health` informa el estado de las dos bases de datos) |
 | `npm run load -- [archivos]` | Carga por línea de comandos los CSV indicados (sin argumentos, todos los de `data/`) |
 | `npm run reconstruir` | Recalcula las colecciones derivadas y sincroniza Neo4j sin leer los CSV |
+| `npm run reiniciar -- --si` | **Borra** los datos de MongoDB y Neo4j para volver a cargar desde cero (sin `--si` no hace nada) |
 | `npm run consultas` | Ejecuta las 20 consultas de MongoDB y muestra filas y tiempos |
 | `npm run doc:consultas` | Regenera `docs/consultas-mongodb.md` con los pipelines y resultados reales |
+| `npm run cypher` | Ejecuta las 6 consultas Cypher y las vistas del grafo, mostrando filas y tiempos |
+| `npm run doc:cypher` | Regenera `docs/consultas-cypher.md` con el Cypher y los resultados reales |
 | `npm run catalogo` | Regenera el catálogo de municipios usado por la regla R-G5 |
 | `npm test` | Ejecuta las pruebas unitarias |
 | `npm run build` | Revisa los tipos con el compilador de TypeScript |
@@ -67,6 +70,19 @@ npm start
 | `GET /api/analytics/consultas/:id` | Ejecuta una consulta (`q01` a `q20`). Parámetros en la URL, por ejemplo `?anio_ingreso=2019`. Devuelve las filas y el pipeline usado |
 
 Detalle de cada consulta, con su pipeline y resultados: [docs/consultas-mongodb.md](docs/consultas-mongodb.md).
+
+## API de grafos (Neo4j)
+
+| Método y ruta | Descripción |
+|---|---|
+| `GET /api/graph/consultas` | Catálogo de las 6 consultas Cypher (`g01` a `g06`) |
+| `GET /api/graph/consultas/:id` | Ejecuta una consulta Cypher; parámetros en la URL (`?departamento=GUATEMALA&anio_ingreso=2019`) |
+| `GET /api/graph/catalogos` | Departamentos, carreras, años, tipos y materias (para llenar filtros) |
+| `GET /api/graph/resumen` | Cantidad de nodos y relaciones por tipo |
+| `GET /api/graph/mapa-demanda` | Subgrafo Departamento–Municipio–Carrera; filtros `anio_ingreso`, `departamento`, `solo_aprobados`, `limite` |
+| `GET /api/graph/aspirante/:id` | Red de un aspirante: postulaciones, carreras, lugar, institución y evaluaciones |
+
+Detalle de las consultas Cypher: [docs/consultas-cypher.md](docs/consultas-cypher.md).
 
 Resultado esperado de cargar los 10 archivos: 208,453 filas leídas, 207,606 cargadas, 847 rechazadas
 (todas por duplicado), 40,197 aspirantes, 56,337 postulaciones y 8,471 aprobados. En Neo4j, 96,831 nodos y

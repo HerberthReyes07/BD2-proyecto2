@@ -129,7 +129,7 @@ las veces que haga falta.
 | 4 | Relaciones `EVALUADA_EN` | 5,000 evaluaciones |
 
 Cada lote se envía como una lista con `UNWIND $filas AS f` y una sola consulta por lote, que es mucho más
-rápido que una consulta por fila. Ejemplo del paso 4 (borrador, aún sin ejecutar contra la base):
+rápido que una consulta por fila. Ejemplo del paso 4 (es la consulta que usa el cargador, en `neo4j.loader.ts`):
 
 ```cypher
 UNWIND $filas AS e
@@ -142,40 +142,24 @@ SET r.fecha = date(e.fecha), r.aprobada = e.aprobada, r.intento = e.intento, r.c
 El driver de Neo4j devuelve contadores de lo que cada lote creó o actualizó. Se suman y se guardan en
 `cargas.neo4j` (nodos y relaciones creados, duración, estado), que es lo que se muestra en el reporte de carga.
 
-## 8. Consultas de grafos previstas
+## 8. Consultas de grafos
 
 El enunciado pide al menos 5 consultas distintas que usen nodos, relaciones, propiedades, filtros y recorridos.
-Estas son las candidatas; el texto Cypher final, ejecutado y explicado, irá en
-[consultas-cypher.md](consultas-cypher.md).
+Se implementaron 6, cada una en su propio archivo de `backend/src/modules/graph/cypher/`. El texto Cypher
+ejecutado, su explicación y sus resultados están en [consultas-cypher.md](consultas-cypher.md).
 
 | # | Consulta | Qué demuestra |
 |---|---|---|
-| G1 | Carreras más demandadas desde un departamento en un año (parámetros: departamento y año) | Recorrido de 3 saltos (`Departamento ← Municipio ← Postulacion → Carrera`) y filtros por propiedad |
-| G2 | Pares de carreras que comparten aspirantes (postulaciones con dos carreras) | Patrón que une dos nodos a través de un tercero |
-| G3 | Aspirantes que cambian de carrera entre años consecutivos | Recorrido que cruza años a través del `Aspirante` |
-| G4 | Aspirantes que aprobaron Matemática hasta su 3.er intento o más, por tipo de institución | Filtro por **propiedades de la relación** (`intento`, `aprobada`) |
-| G5 | Flujo de aprobados: de qué departamentos a qué carreras llegan los habilitados | Camino largo con filtro por propiedad del nodo (`aprobado`) |
-| G6 | Aspirantes que se presentan en 3 o más años y cómo termina cada postulación | Conteo de relaciones y comparación de estados |
+| G1 | Carreras más demandadas desde un departamento (y año opcional) | Recorrido de 3 saltos (`Departamento ← Municipio ← Postulacion → Carrera`) y filtro por propiedad |
+| G2 | Pares de carreras que comparten aspirantes | Patrón que une dos nodos a través de un tercero |
+| G3 | Aspirantes que cambian de carrera de un año al siguiente | Recorrido que cruza años a través del `Aspirante` |
+| G4 | Aprobaron Matemática en su intento N o posterior, por tipo de institución | Filtro por **propiedades de la relación** (`intento`, `aprobada`) |
+| G5 | Flujo de aprobados: de qué departamentos a qué carreras | Camino largo con filtro por propiedad del nodo (`aprobado`) |
+| G6 | Aspirantes que postulan varios años y cuántos terminan aprobando | Conteo de relaciones por nodo y agregación en dos niveles |
 
-Dos borradores, para ilustrar la sintaxis (**sin ejecutar todavía**; se validarán contra la base real):
-
-```cypher
-// G2: pares de carreras que comparten postulaciones
-MATCH (c1:Carrera)<-[:ASPIRA_A]-(p:Postulacion)-[:ASPIRA_A]->(c2:Carrera)
-WHERE c1.nombre < c2.nombre
-RETURN c1.nombre AS carrera_a, c2.nombre AS carrera_b, count(DISTINCT p) AS postulaciones
-ORDER BY postulaciones DESC
-LIMIT 10;
-
-// G3: cambios de carrera de un año al siguiente
-MATCH (a:Aspirante)-[:POSTULO]->(p1:Postulacion)-[:ASPIRA_A]->(c1:Carrera),
-      (a)-[:POSTULO]->(p2:Postulacion)-[:ASPIRA_A]->(c2:Carrera)
-WHERE p2.anio_ingreso = p1.anio_ingreso + 1
-  AND NOT (p2)-[:ASPIRA_A]->(c1)
-  AND NOT (p1)-[:ASPIRA_A]->(c2)
-RETURN c1.nombre AS desde, c2.nombre AS hacia, count(DISTINCT a) AS aspirantes
-ORDER BY aspirantes DESC;
-```
+Los resultados se verificaron contra MongoDB recalculando cada cifra con un método distinto (`countDocuments`,
+`$all`, `$size` y un recorrido por aspirante); las 11 comprobaciones coinciden. El detalle está al final de
+[consultas-cypher.md](consultas-cypher.md).
 
 ## 9. Visualización
 
@@ -187,14 +171,18 @@ subgrafo limitado por filtros:
 | **A. Mapa de demanda** | `Departamento – Municipio – Carrera`, con el grosor de la arista según el número de postulaciones | Hasta 23 + 253 + 14 nodos | Año de ingreso, departamento, solo aprobados |
 | **B. Red de un aspirante** | Un `Aspirante`, sus `Postulacion`, carreras, materias y lugar de procedencia | Unas decenas de nodos | Búsqueda por identificador |
 
-Ambas se piden al backend, que ejecuta una consulta Cypher con `LIMIT` y devuelve nodos y aristas en un formato
-que Cytoscape.js dibuja directamente. Los filtros del enunciado ("al menos uno") se cubren con el de año y el de
-departamento de la vista A.
+Ambas se piden al backend (`GET /api/graph/mapa-demanda` y `GET /api/graph/aspirante/:id`), que ejecuta una consulta
+Cypher con `LIMIT` y devuelve nodos y aristas en un formato que Cytoscape.js dibuja directamente. La vista A es una
+**proyección**: sus aristas municipio → carrera no existen como relaciones en el grafo, sino que se calculan contando
+las postulaciones que conectan a ambos. Los filtros del enunciado ("al menos uno") se cubren con el de año, el de
+departamento y el de solo aprobados de la vista A.
 
 ## 10. Limitaciones
 
 - Una postulación con carrera `null` (6,146 de 56,337, todas de 2015, porque `NINGUNO` solo existe en ese año) no aparece en ninguna consulta por carrera.
 - `INGENIERIA MECANICA (INDUSTRIAL O ELECTRICA, SIN PRECISAR)` es una carrera con la propiedad `ambigua: true`. Las
   consultas por carrera deben tenerlo en cuenta.
-- Las consultas de grafos (G1 a G6) son borradores. El número de nodos y relaciones sale de aplicar las reglas del
-  ETL a los CSV; se confirmará con los contadores de la carga real.
+- El dataset escribe el departamento `QUEZALTENANGO` (sin la T) aunque su municipio sí se escribe `QUETZALTENANGO`. El
+  ETL lo corrige a `QUETZALTENANGO` (regla R-G8 de [reglas-etl.md](reglas-etl.md)), así que en Neo4j existe un único
+  nodo `Departamento` con el nombre oficial y el municipio se identifica como `QUETZALTENANGO|QUETZALTENANGO`.
+- Los números de nodos y relaciones de este documento (96,831 y 430,700) se confirmaron con la carga real en Neo4j.

@@ -73,7 +73,7 @@ Causas de rechazo: `ESTRUCTURA_INVALIDA`, `CAMPO_REQUERIDO_VACIO`, `FECHA_INVALI
 
 Advertencias de evaluación: `SEXO_SIN_REGISTRO`, `SIN_ANIO_NACIMIENTO`, `EDAD_FUERA_DE_RANGO`, `SIN_CARRERA`,
 `CARRERA_COMPLETADA`, `CARRERA_AMBIGUA`, `INSTITUCION_SIN_DATOS`, `ZONA_NO_DISPONIBLE`,
-`MUNICIPIO_RECUPERADO`, `MUNICIPIO_TRUNCADO`, `ANIO_INGRESO_DISTINTO_DE_ARCHIVO`.
+`MUNICIPIO_RECUPERADO`, `MUNICIPIO_TRUNCADO`, `DEPARTAMENTO_CORREGIDO`, `ANIO_INGRESO_DISTINTO_DE_ARCHIVO`.
 
 Advertencias de aspirante o materia: `CONFLICTO_SEXO`, `REPROBACION_POSTERIOR_A_APROBACION`, `MULTIPLE_APROBACION`.
 
@@ -148,6 +148,7 @@ No se puede verificar, porque no se conoce la regla de truncado del origen.
 | R-G5 | **Municipios truncados** (valor crudo de 19 caracteres o con espacio final, solo 2022–2024). Se busca en el catálogo de 2015–2021, en el mismo departamento, un nombre que empiece con el prefijo recortado. Si el valor ya aparece tal cual en el catálogo (por ejemplo `SAN PEDRO LA LAGUNA`, que mide justo 19 caracteres) se considera completo y no lleva advertencia. Si hay **un único** candidato se sustituye (`MUNICIPIO_RECUPERADO`). Si no hay ninguno se conserva recortado (`MUNICIPIO_TRUNCADO`). | 2,439 recuperados; 23 sin candidato (`SAN MARTIN` en Retalhuleu, `SAN SEBASTIAN` en Huehuetenango y `SAN CARLOS` en Quetzaltenango) |
 | R-G6 | La clave geográfica es **(departamento, municipio)**: hay nombres repetidos en departamentos distintos (`SAN JOSE`, `SANTA LUCIA`, `SAN ANDRES`, entre otros). | — |
 | R-G7 | `PUEBLO NUEVO VIÑAS` se conserva con la Ñ (UTF-8). | 1 municipio |
+| R-G8 | **Departamento mal escrito:** el dataset escribe `QUEZALTENANGO` (sin la T), pero el nombre oficial es `QUETZALTENANGO`, que es además como el propio dataset escribe el municipio. Se corrige a `QUETZALTENANGO` y la evaluación queda marcada con `DEPARTAMENTO_CORREGIDO`. Se compararon los 22 departamentos oficiales contra los valores del dataset y este es el único que difiere (`EXTRANJERO` es una categoría legítima). | 2,176 filas originales (2,163 evaluaciones cargadas) |
 
 R-G5 es una regla adicional pensada para evitar nodos duplicados en Neo4j (por ejemplo, `SAN LUCAS SACATEPEQ`
 junto a `SAN LUCAS SACATEPEQUEZ`).

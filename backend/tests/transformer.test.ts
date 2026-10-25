@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import catalogoMunicipios from '../src/modules/etl/catalogos/municipios.json';
 import { calcularEdad, MECANICA_SIN_PRECISAR, transformarCarrera, transformarUbicacion } from '../src/modules/etl/pipeline/transformer';
 
 test('R-C4: la carrera truncada con espacio final NO se confunde con la carrera real', () => {
@@ -58,6 +59,23 @@ test('R-G1: SIN DATOS pasa a null en los tres campos', () => {
   assert.equal(u.municipio, null);
   assert.equal(u.tipo_institucion, null);
   assert.deepEqual(u.advertencias, ['INSTITUCION_SIN_DATOS']);
+});
+
+test('R-G8: el departamento mal escrito QUEZALTENANGO se corrige a QUETZALTENANGO y queda marcado', () => {
+  const u = transformarUbicacion('QUEZALTENANGO', 'QUETZALTENANGO', 'PUBLICO');
+  assert.equal(u.departamento, 'QUETZALTENANGO');
+  assert.equal(u.municipio, 'QUETZALTENANGO');
+  assert.deepEqual(u.advertencias, ['DEPARTAMENTO_CORREGIDO']);
+  // un departamento bien escrito no se toca ni se marca
+  const g = transformarUbicacion('GUATEMALA', 'MIXCO', 'PRIVADO');
+  assert.equal(g.departamento, 'GUATEMALA');
+  assert.deepEqual(g.advertencias, []);
+});
+
+test('R-G8: el catálogo de municipios usa la grafía oficial del departamento', () => {
+  const claves = Object.keys(catalogoMunicipios);
+  assert.ok(claves.includes('QUETZALTENANGO'));
+  assert.ok(!claves.includes('QUEZALTENANGO'));
 });
 
 test('R-ED: la edad válida va de 13 a 70 años', () => {

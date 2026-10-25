@@ -1,6 +1,6 @@
 import catalogoMunicipios from '../catalogos/municipios.json';
 import { Advertencia, EvaluacionDoc, FilaValidada } from '../etl.types';
-import { normalizarTexto } from './texto';
+import { corregirDepartamento, normalizarTexto } from './texto';
 
 export { normalizarTexto };
 
@@ -52,7 +52,9 @@ export function transformarUbicacion(
   const mun = normalizarTexto(municipioCrudo);
   const tipo = normalizarTexto(tipoCrudo);
 
-  const departamento = dep === 'SIN DATOS' ? null : dep;
+  const { departamento: depOficial, corregido } = corregirDepartamento(dep); // R-G8
+  if (corregido) advertencias.push('DEPARTAMENTO_CORREGIDO');
+  const departamento = dep === 'SIN DATOS' ? null : depOficial;
   const tipo_institucion = tipo === 'SIN DATOS' ? null : tipo;
   let municipio: string | null = null;
   let zona: number | null = null;

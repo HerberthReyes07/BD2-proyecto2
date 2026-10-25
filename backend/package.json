@@ -12,7 +12,10 @@
     "catalogo": "tsx scripts/generar-catalogo-municipios.ts",
     "reconstruir": "tsx scripts/reconstruir.ts",
     "consultas": "tsx scripts/probar-consultas.ts",
-    "doc:consultas": "tsx scripts/generar-doc-consultas.ts"
+    "doc:consultas": "tsx scripts/generar-doc-consultas.ts",
+    "cypher": "tsx scripts/probar-cypher.ts",
+    "doc:cypher": "tsx scripts/generar-doc-cypher.ts",
+    "reiniciar": "tsx scripts/reiniciar.ts"
   },
   "dependencies": {
     "cors": "^2.8.6",

@@ -8,7 +8,7 @@
 import { mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { leerFilas } from '../src/modules/etl/pipeline/reader';
-import { normalizarTexto } from '../src/modules/etl/pipeline/texto';
+import { corregirDepartamento, normalizarTexto } from '../src/modules/etl/pipeline/texto';
 
 async function main() {
   const carpeta = path.resolve(process.argv[2] ?? path.join(__dirname, '../../data'));
@@ -21,7 +21,7 @@ async function main() {
   for (const archivo of archivos) {
     for await (const item of leerFilas(path.join(carpeta, archivo))) {
       if (item.tipo !== 'fila') continue;
-      const dep = normalizarTexto(item.valores.departamento_institucion_educativa);
+      const dep = corregirDepartamento(normalizarTexto(item.valores.departamento_institucion_educativa)).departamento;
       let mun = normalizarTexto(item.valores.municipio_institucion_educativa);
       if (dep === 'SIN DATOS' || mun === 'SIN DATOS') continue;
       if (mun.startsWith('GUATEMALA - CIUDAD')) mun = 'GUATEMALA'; // las zonas de la capital se tratan aparte (R-G4)
