@@ -10,7 +10,9 @@
     "load": "tsx scripts/load-csv.ts",
     "test": "node --import tsx --test tests/*.test.ts",
     "catalogo": "tsx scripts/generar-catalogo-municipios.ts",
-    "reconstruir": "tsx scripts/reconstruir.ts"
+    "reconstruir": "tsx scripts/reconstruir.ts",
+    "consultas": "tsx scripts/probar-consultas.ts",
+    "doc:consultas": "tsx scripts/generar-doc-consultas.ts"
   },
   "dependencies": {
     "cors": "^2.8.6",

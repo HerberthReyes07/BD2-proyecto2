@@ -321,10 +321,13 @@ documentación de consultas incluirá el resultado de `explain()` de las más im
    vigencia por materia es más clara en código.
 4. **Después:** se sincroniza Neo4j (ver [modelo-neo4j.md](modelo-neo4j.md)) y se cierra el documento de `cargas`.
 
-## 11. Decisiones pendientes
+## 11. Decisiones tomadas
 
-| Tema | Propuesta |
+| Tema | Decisión |
 |---|---|
-| Consulta 9: "por mes" | Agrupar por año-mes (`2014-08`), que da una serie más informativa. Se puede ofrecer también por mes del año (`mes`) |
-| Consulta 19: cuántas carreras por departamento | Las 3 más demandadas de cada departamento |
+| Consulta 9: "por mes" | Se agrupa por año-mes (`2014-08`), que da una serie más informativa. El campo `mes` queda disponible para agrupar por mes del año |
+| Consulta 19: cuántas carreras por departamento | Las 3 más demandadas de cada departamento (parámetro `top`) |
+| Consultas 1, 12 y 17 | Cada persona cuenta una sola vez, con los datos de su postulación más reciente |
 | Validación de esquema con `$jsonSchema` en `evaluaciones` | Opcional; solo si sobra tiempo |
+
+Las 20 consultas están implementadas y documentadas en [consultas-mongodb.md](consultas-mongodb.md).

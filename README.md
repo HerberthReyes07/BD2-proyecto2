@@ -44,6 +44,8 @@ npm start
 | `npm start` | Inicia la API (`GET /api/health` informa el estado de las dos bases de datos) |
 | `npm run load -- [archivos]` | Carga por línea de comandos los CSV indicados (sin argumentos, todos los de `data/`) |
 | `npm run reconstruir` | Recalcula las colecciones derivadas y sincroniza Neo4j sin leer los CSV |
+| `npm run consultas` | Ejecuta las 20 consultas de MongoDB y muestra filas y tiempos |
+| `npm run doc:consultas` | Regenera `docs/consultas-mongodb.md` con los pipelines y resultados reales |
 | `npm run catalogo` | Regenera el catálogo de municipios usado por la regla R-G5 |
 | `npm test` | Ejecuta las pruebas unitarias |
 | `npm run build` | Revisa los tipos con el compilador de TypeScript |
@@ -56,6 +58,15 @@ npm start
 | `GET /api/etl/cargas` | Historial de cargas |
 | `GET /api/etl/cargas/:id/rechazados` | Filas rechazadas de una carga (`?causa=`, `?limite=`, `?salto=`) |
 | `POST /api/etl/reconstruir` | Recalcula derivadas y Neo4j |
+
+## API de consultas (MongoDB)
+
+| Método y ruta | Descripción |
+|---|---|
+| `GET /api/analytics/consultas` | Catálogo de las 20 consultas (título, tipo de gráfica, parámetros) |
+| `GET /api/analytics/consultas/:id` | Ejecuta una consulta (`q01` a `q20`). Parámetros en la URL, por ejemplo `?anio_ingreso=2019`. Devuelve las filas y el pipeline usado |
+
+Detalle de cada consulta, con su pipeline y resultados: [docs/consultas-mongodb.md](docs/consultas-mongodb.md).
 
 Resultado esperado de cargar los 10 archivos: 208,453 filas leídas, 207,606 cargadas, 847 rechazadas
 (todas por duplicado), 40,197 aspirantes, 56,337 postulaciones y 8,471 aprobados. En Neo4j, 96,831 nodos y

@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import { mongoDisponible } from './config/mongo';
 import { neo4jDisponible } from './config/neo4j';
+import { analyticsRoutes } from './modules/analytics/analytics.routes';
 import { etlRoutes } from './modules/etl/etl.routes';
 import { asyncHandler, manejarErrores } from './shared/middlewares/errorHandler';
 
@@ -20,6 +21,7 @@ export function crearApp() {
   );
 
   app.use('/api/etl', etlRoutes);
+  app.use('/api/analytics', analyticsRoutes);
 
   app.use((_req, res) => {
     res.status(404).json({ error: { codigo: 'NO_ENCONTRADO', mensaje: 'Ruta no encontrada.' } });

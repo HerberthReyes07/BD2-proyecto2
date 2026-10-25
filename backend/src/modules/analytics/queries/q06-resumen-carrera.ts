@@ -1,4 +1,5 @@
 import { Db, Document } from 'mongodb';
+import { ConsultaMongo } from '../analytics.types';
 
 /**
  * Consulta 6: crear la colección auxiliar `resumen_carrera` con un resumen por carrera.
@@ -50,11 +51,11 @@ export const pipelineResumenCarrera: Document[] = [
         $size: { $reduce: { input: '$aspirantes', initialValue: [], in: { $setUnion: ['$$value', '$$this'] } } },
       },
       aprobados: 1,
-      tasa_aprobacion: { $multiply: [{ $divide: ['$aprobados', '$postulaciones'] }, 100] }, // en porcentaje
+      tasa_aprobacion: { $round: [{ $multiply: [{ $divide: ['$aprobados', '$postulaciones'] }, 100] }, 2] }, // en porcentaje
       aprobados_en_el_anio: 1,
-      edad_promedio: { $cond: [{ $gt: ['$n_edad', 0] }, { $divide: ['$suma_edad', '$n_edad'] }, null] },
+      edad_promedio: { $cond: [{ $gt: ['$n_edad', 0] }, { $round: [{ $divide: ['$suma_edad', '$n_edad'] }, 2] }, null] },
       edad_promedio_aprobados: {
-        $cond: [{ $gt: ['$n_edad_aprobados', 0] }, { $divide: ['$suma_edad_aprobados', '$n_edad_aprobados'] }, null],
+        $cond: [{ $gt: ['$n_edad_aprobados', 0] }, { $round: [{ $divide: ['$suma_edad_aprobados', '$n_edad_aprobados'] }, 2] }, null],
       },
       primer_anio: 1,
       ultimo_anio: 1,
@@ -70,3 +71,23 @@ export async function crearResumenCarrera(db: Db): Promise<number> {
   await db.collection('postulaciones').aggregate(pipelineResumenCarrera).toArray();
   return db.collection('resumen_carrera').countDocuments();
 }
+
+export const consulta: ConsultaMongo = {
+  id: 'q06',
+  numero: 6,
+  titulo: 'Colección auxiliar resumen_carrera',
+  descripcion: 'Genera (o actualiza) la colección `resumen_carrera` con un resumen por carrera y muestra su contenido.',
+  explicacion:
+    'El pipeline agrupa `postulaciones` por carrera (con `$unwind` sobre `carreras`), calcula totales, tasas y edades promedio, y ' +
+    'termina con `$merge`, que escribe el resultado en la colección `resumen_carrera` en vez de devolverlo. Al terminar, la ' +
+    'consulta lee esa colección para mostrarla. Se vuelve a generar sola después de cada carga de datos.',
+  coleccion: 'postulaciones',
+  grafica: 'tabla',
+  parametros: [],
+  filtroAnio: false,
+  construirPipeline: () => pipelineResumenCarrera,
+  ejecutar: async (db) => {
+    await crearResumenCarrera(db);
+    return db.collection('resumen_carrera').find({}, { projection: { _id: 0 } }).sort({ postulaciones: -1 }).toArray();
+  },
+};
