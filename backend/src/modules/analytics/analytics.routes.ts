@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { asyncHandler } from '../../shared/middlewares/errorHandler';
-import { ejecutar, listar } from './analytics.controller';
+import { ejecutar, listar, resumen } from './analytics.controller';
 
 export const analyticsRoutes = Router();
 
+analyticsRoutes.get('/resumen', asyncHandler(resumen));
 analyticsRoutes.get('/consultas', listar);
 analyticsRoutes.get('/consultas/:id', asyncHandler(ejecutar));

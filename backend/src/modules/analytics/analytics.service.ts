@@ -26,6 +26,31 @@ export function listarConsultas() {
   return CONSULTAS.map(describir);
 }
 
+/** Cifras generales para las tarjetas del dashboard. */
+export async function resumenGeneral() {
+  const db = await getDb();
+  const [evaluaciones, postulaciones, aspirantes, aprobados, aprobadosEnElAnio, anios, rechazados] = await Promise.all([
+    db.collection('evaluaciones').countDocuments(),
+    db.collection('postulaciones').countDocuments(),
+    db.collection('aspirantes').countDocuments(),
+    db.collection('postulaciones').countDocuments({ aprobado: true }),
+    db.collection('postulaciones').countDocuments({ aprobo_ambas_en_el_anio: true }),
+    db.collection('postulaciones').distinct('anio_ingreso'),
+    db.collection('rechazados').countDocuments(),
+  ]);
+  const ordenados = (anios as number[]).sort((a, b) => a - b);
+  return {
+    evaluaciones,
+    postulaciones,
+    aspirantes,
+    aprobados,
+    aprobados_en_el_anio: aprobadosEnElAnio,
+    rechazados,
+    anio_inicial: ordenados[0] ?? null,
+    anio_final: ordenados[ordenados.length - 1] ?? null,
+  };
+}
+
 /** Ejecuta una consulta con los parámetros recibidos en la URL y devuelve las filas junto con el pipeline usado. */
 export async function ejecutarConsulta(id: string, entrada: Record<string, unknown>) {
   const consulta = buscarConsulta(id);

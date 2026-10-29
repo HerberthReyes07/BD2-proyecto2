@@ -5,6 +5,7 @@ import { neo4jDisponible } from './config/neo4j';
 import { analyticsRoutes } from './modules/analytics/analytics.routes';
 import { etlRoutes } from './modules/etl/etl.routes';
 import { graphRoutes } from './modules/graph/graph.routes';
+import { searchRoutes } from './modules/search/search.routes';
 import { asyncHandler, manejarErrores } from './shared/middlewares/errorHandler';
 
 export function crearApp() {
@@ -24,6 +25,7 @@ export function crearApp() {
   app.use('/api/etl', etlRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/graph', graphRoutes);
+  app.use('/api/search', searchRoutes);
 
   app.use((_req, res) => {
     res.status(404).json({ error: { codigo: 'NO_ENCONTRADO', mensaje: 'Ruta no encontrada.' } });

@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import { getDb } from '../../config/mongo';
 import { AppError } from '../../shared/errors/AppError';
 import { cargarArchivos, reconstruirTodo } from './etl.service';
+import { reiniciarDatos } from './reiniciar.service';
 
 /** POST /api/etl/cargas — recibe uno o varios CSV (campo "archivos") y devuelve el reporte de cada uno. */
 export async function crearCargas(req: Request, res: Response): Promise<void> {
@@ -44,4 +45,15 @@ export async function listarRechazados(req: Request, res: Response): Promise<voi
 /** POST /api/etl/reconstruir — recalcula colecciones derivadas y Neo4j sin cargar archivos nuevos. */
 export async function reconstruir(_req: Request, res: Response): Promise<void> {
   res.json(await reconstruirTodo());
+}
+
+/**
+ * DELETE /api/etl/datos?confirmar=si — borra TODOS los datos cargados (MongoDB y Neo4j). Exige la confirmación
+ * explícita en la URL para que un error o una llamada accidental no pueda vaciar las bases.
+ */
+export async function borrarDatos(req: Request, res: Response): Promise<void> {
+  if (req.query.confirmar !== 'si') {
+    throw new AppError(400, 'CONFIRMACION_REQUERIDA', 'Para borrar todos los datos agrega ?confirmar=si a la petición.');
+  }
+  res.json(await reiniciarDatos());
 }

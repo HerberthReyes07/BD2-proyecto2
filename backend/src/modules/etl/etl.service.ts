@@ -1,7 +1,9 @@
 import { Db } from 'mongodb';
 import { getDb } from '../../config/mongo';
+import { crearIndicesMongo } from '../../db/mongo.indexes';
 import { AppError } from '../../shared/errors/AppError';
 import { log } from '../../shared/utils/logger';
+import { conBloqueo } from './bloqueo';
 import { reconstruirDerivadas, ResumenDerivacion } from './derivar.service';
 import { Rechazo, ReporteCarga, ResumenNeo4j } from './etl.types';
 import { Entrada, agregarSinDuplicar } from './pipeline/deduplicar';
@@ -107,9 +109,15 @@ export async function procesarArchivo(db: Db, archivo: ArchivoEntrada): Promise<
  * Carga uno o varios archivos y, si entraron datos nuevos, reconstruye las colecciones derivadas y
  * sincroniza Neo4j UNA vez al final (el estado de un aspirante depende de todos sus años).
  */
-export async function cargarArchivos(archivos: ArchivoEntrada[]): Promise<ResultadoCargas> {
+export function cargarArchivos(archivos: ArchivoEntrada[]): Promise<ResultadoCargas> {
   if (archivos.length === 0) throw new AppError(400, 'SIN_ARCHIVOS', 'No se recibió ningún archivo CSV.');
+  return conBloqueo('carga de archivos', () => ejecutarCarga(archivos));
+}
+
+async function ejecutarCarga(archivos: ArchivoEntrada[]): Promise<ResultadoCargas> {
   const db = await getDb();
+  // Los índices se crean antes de cargar: si los datos se borraron antes, las colecciones nuevas no los tienen
+  await crearIndicesMongo(db);
 
   const reportes: ReporteCarga[] = [];
   for (const archivo of archivos) reportes.push(await procesarArchivo(db, archivo));
@@ -141,9 +149,11 @@ export async function cargarArchivos(archivos: ArchivoEntrada[]): Promise<Result
 }
 
 /** Reconstruye derivadas y Neo4j sin cargar archivos (útil si una sincronización anterior falló). */
-export async function reconstruirTodo(): Promise<{ derivadas: ResumenDerivacion; neo4j: ResumenNeo4j }> {
-  const db = await getDb();
-  const derivadas = await reconstruirDerivadas(db);
-  const neo4j = await sincronizarNeo4j(db);
-  return { derivadas, neo4j };
+export function reconstruirTodo(): Promise<{ derivadas: ResumenDerivacion; neo4j: ResumenNeo4j }> {
+  return conBloqueo('reconstrucción de datos derivados', async () => {
+    const db = await getDb();
+    const derivadas = await reconstruirDerivadas(db);
+    const neo4j = await sincronizarNeo4j(db);
+    return { derivadas, neo4j };
+  });
 }

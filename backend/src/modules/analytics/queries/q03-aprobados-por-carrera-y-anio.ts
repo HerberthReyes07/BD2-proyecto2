@@ -11,7 +11,7 @@ export const consulta: ConsultaMongo = {
     'carrera, de modo que una postulación con dos carreras cuenta en ambas. Las postulaciones sin carrera (casi todas de 2015, donde ' +
     'la carrera era `NINGUNO`) no aparecen aquí.',
   coleccion: 'postulaciones',
-  grafica: 'barras_agrupadas',
+  grafica: 'barras_apiladas',
   ejes: { x: 'anio_ingreso', y: ['aprobados'], serie: 'carrera' },
   parametros: [],
   filtroAnio: false,

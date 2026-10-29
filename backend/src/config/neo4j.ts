@@ -9,6 +9,10 @@ export function getDriver(): Driver {
   if (!driver) {
     driver = neo4j.driver(env.neo4jUri, neo4j.auth.basic(env.neo4jUsuario, env.neo4jClave), {
       disableLosslessIntegers: true,
+      // Si Neo4j no responde, fallar rápido (por defecto el driver reintenta 30 s y la interfaz parecería colgada)
+      maxTransactionRetryTime: 3000,
+      connectionTimeout: 3000,
+      connectionAcquisitionTimeout: 5000,
     });
   }
   return driver;

@@ -16,7 +16,7 @@ Aplicación para cargar, analizar y visualizar las pruebas específicas de aspir
 
 - Node.js 20 o superior
 - Docker y Docker Compose
-- Los 10 archivos `pruebas_especificas_AAAA.csv` copiados en `data/`
+- Los 10 archivos `pruebas_especificas_AAAA.csv` (2015 a 2024) copiados en `data/`. Se descargan del portal de [Datos Abiertos de la Facultad de Ingeniería – Pruebas específicas](https://datosabiertos.ingenieria.usac.edu.gt/dataset/pruebas-especificas); los CSV no se versionan en el repositorio
 
 ## Puesta en marcha
 
@@ -37,6 +37,18 @@ npm run load
 npm start
 ```
 
+En otra terminal, la interfaz:
+
+```bash
+# 6. Interfaz web en http://localhost:5173 (el servidor de desarrollo reenvía /api al backend)
+cd frontend && npm install && npm run dev
+```
+
+La interfaz tiene cuatro secciones: **Dashboard** (las 20 consultas de MongoDB con gráficas y tablas), **Grafos** (mapa de
+demanda, red de un aspirante y consultas Cypher), **Buscador** (filtros por aspirante, carrera, institución, materia, municipio y
+departamento) y **Carga de archivos** (subida de CSV con reporte y filas rechazadas). El navegador solo habla con el backend:
+nunca se conecta directamente a MongoDB ni a Neo4j.
+
 ## Comandos del backend
 
 | Comando | Qué hace |
@@ -44,7 +56,7 @@ npm start
 | `npm start` | Inicia la API (`GET /api/health` informa el estado de las dos bases de datos) |
 | `npm run load -- [archivos]` | Carga por línea de comandos los CSV indicados (sin argumentos, todos los de `data/`) |
 | `npm run reconstruir` | Recalcula las colecciones derivadas y sincroniza Neo4j sin leer los CSV |
-| `npm run reiniciar -- --si` | **Borra** los datos de MongoDB y Neo4j para volver a cargar desde cero (sin `--si` no hace nada) |
+| `npm run reiniciar -- --si` | **Borra** los datos de MongoDB y Neo4j para volver a cargar desde cero (sin `--si` no hace nada). Equivale al botón de la interfaz |
 | `npm run consultas` | Ejecuta las 20 consultas de MongoDB y muestra filas y tiempos |
 | `npm run doc:consultas` | Regenera `docs/consultas-mongodb.md` con los pipelines y resultados reales |
 | `npm run cypher` | Ejecuta las 6 consultas Cypher y las vistas del grafo, mostrando filas y tiempos |
@@ -61,11 +73,15 @@ npm start
 | `GET /api/etl/cargas` | Historial de cargas |
 | `GET /api/etl/cargas/:id/rechazados` | Filas rechazadas de una carga (`?causa=`, `?limite=`, `?salto=`) |
 | `POST /api/etl/reconstruir` | Recalcula derivadas y Neo4j |
+| `DELETE /api/etl/datos?confirmar=si` | **Borra todos los datos cargados** (MongoDB y Neo4j). Sin `?confirmar=si` responde 400 y no borra nada. Es lo que hace el botón «Borrar todos los datos» de la página de carga |
+
+Las operaciones pesadas (cargar, reconstruir y borrar) no se pueden ejecutar a la vez: si ya hay una en curso, la nueva responde 409.
 
 ## API de consultas (MongoDB)
 
 | Método y ruta | Descripción |
 |---|---|
+| `GET /api/analytics/resumen` | Cifras generales (evaluaciones, aspirantes, aprobados...) |
 | `GET /api/analytics/consultas` | Catálogo de las 20 consultas (título, tipo de gráfica, parámetros) |
 | `GET /api/analytics/consultas/:id` | Ejecuta una consulta (`q01` a `q20`). Parámetros en la URL, por ejemplo `?anio_ingreso=2019`. Devuelve las filas y el pipeline usado |
 
@@ -87,6 +103,13 @@ Detalle de las consultas Cypher: [docs/consultas-cypher.md](docs/consultas-cyphe
 Resultado esperado de cargar los 10 archivos: 208,453 filas leídas, 207,606 cargadas, 847 rechazadas
 (todas por duplicado), 40,197 aspirantes, 56,337 postulaciones y 8,471 aprobados. En Neo4j, 96,831 nodos y
 430,700 relaciones. Detalles en [docs/reglas-etl.md](docs/reglas-etl.md).
+
+## API del buscador
+
+| Método y ruta | Descripción |
+|---|---|
+| `GET /api/search/postulaciones` | Busca postulaciones. Filtros opcionales: `aspirante_id` (prefijo), `carrera`, `tipo_institucion`, `materia`, `departamento`, `municipio`, `anio_ingreso`, `estado`, `edad_min`, `edad_max`; paginación con `pagina` y `por_pagina` |
+| `GET /api/search/catalogos` | Valores para las listas desplegables de los filtros |
 
 ## Documentación
 
