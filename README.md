@@ -113,6 +113,18 @@ Resultado esperado de cargar los 10 archivos: 208,453 filas leídas, 207,606 car
 
 ## Documentación
 
-- [Reglas de ETL](docs/reglas-etl.md)
+### Entregables
+
+| Documento             | Contenido |
+|-----------------------|---|
+| [Manual técnico](docs/Manual-Técnico.pdf) | Arquitectura, instalación, ETL, modelos de MongoDB y Neo4j, API, consultas, pruebas, **análisis de resultados** (cap. 10), **conclusiones** (cap. 11) y el código de las 26 consultas (anexos A y B) |
+| [Manual de usuario](docs/Manual-de-Usuario.pdf) | Cómo usar la aplicación, con capturas de pantalla |
+
+### Documentos de apoyo
+
+El manual técnico los resume y remite a ellos; contienen el detalle completo.
+
+- [Reglas de ETL](docs/reglas-etl.md): cada regla de limpieza y de aprobación, con su código (R-xx) y sus cifras
 - [Modelo de MongoDB](docs/modelo-mongodb.md)
 - [Modelo de Neo4j](docs/modelo-neo4j.md)
+- [Consultas de MongoDB](docs/consultas-mongodb.md) y [consultas de Cypher](docs/consultas-cypher.md), generadas con las consultas reales y sus resultados

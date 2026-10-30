@@ -15,7 +15,8 @@
     "doc:consultas": "tsx scripts/generar-doc-consultas.ts",
     "cypher": "tsx scripts/probar-cypher.ts",
     "doc:cypher": "tsx scripts/generar-doc-cypher.ts",
-    "reiniciar": "tsx scripts/reiniciar.ts"
+    "reiniciar": "tsx scripts/reiniciar.ts",
+    "exportar:manual": "tsx scripts/exportar-datos-manual.ts"
   },
   "dependencies": {
     "cors": "^2.8.6",

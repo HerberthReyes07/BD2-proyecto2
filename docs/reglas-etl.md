@@ -129,7 +129,7 @@ Todo texto se normaliza a mayúsculas, con espacios extremos recortados y espaci
 | R-C5 | El resto de carreras solo se normaliza (mayúsculas, espacios). | — |
 | R-C6 | `ITUGS` se conserva (22 filas, siempre con materia `MATEMATICA ITUGS`). No participa en el estado de aprobación (§10). | 22 |
 | R-C7 | Las licenciaturas en Física y Matemática Aplicada (solo 2016–2019) se conservan. | — |
-| R-C8 | La carrera es **atributo de la evaluación**, no del aspirante: 5,621 de 56,337 postulaciones (10 %) tienen más de una. En agrupaciones por carrera, una postulación cuenta **una vez por cada carrera distinta**. | 5,616 postulaciones con más de una carrera (sin contar `null`, tras quitar duplicados) |
+| R-C8 | La carrera es **atributo de la evaluación**, no del aspirante: 5,616 de 56,337 postulaciones (10 %) tienen más de una. En agrupaciones por carrera, una postulación cuenta **una vez por cada carrera distinta**. | 5,616 postulaciones con más de una carrera (sin contar `null`, tras quitar duplicados) |
 
 Supuesto: en 2022–2024, `INGENIERIA MECANICA` (sin espacio) es la carrera Mecánica propiamente dicha.
 No se puede verificar, porque no se conoce la regla de truncado del origen.
